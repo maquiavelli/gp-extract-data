@@ -19,7 +19,7 @@ def get_reporting_client():
                       credentials=scoped_credentials, 
                       cache_discovery=False)
 
-def get_body(structureReport):
+def get_body(structureReport,pageToken):
   body = {
           "metrics": 
               structureReport["metrics"],
@@ -28,18 +28,19 @@ def get_body(structureReport):
           "timelineSpec": 
               {
               "aggregationPeriod": "DAILY",
-              "endTime": 
-                  {
-                      "day": 11,
-                      "month": 11,
+              "startTime": {
+                      "day": 1,
+                      "month": 7,
                       "year": 2023
                   },
-              "startTime": {
-                      "day": 10,
-                      "month": 11,
+              "endTime": 
+                  {
+                      "day": 1,
+                      "month": 10,
                       "year": 2023
                   }
-              }
+              },
+            "pageToken": pageToken
           }
   return body
     
@@ -61,7 +62,7 @@ def writeJsonFile(data,fileName):
     file = f'{PARAMS_RAW_FOLDER}/{fileName}.json'
     with open(file, 'w', encoding='utf-8') as f:
           json.dump(data, f, ensure_ascii=False, indent=4)
-    print(f'{datetime.now()} : {file} created!')
+    print(f'{datetime.now()} : File {file} created!')
 
 def main():
   reports = [
@@ -123,15 +124,33 @@ def main():
       }
   ]
   
-  for report in reports:
-      body = get_body(report)
-      
-      dispatchReport = get_report_method(report)
-
-      dataReponse = dispatchReport.query(
-                      name=f'apps/{report["app"]}/{report["type"]}', 
-                      body=body).execute()
-      
-      writeJsonFile(dataReponse,report["fileName"])
+  for report in reports:  
+    dispatch_report = get_report_method(report)
+    
+    should_repeat = True
+    page_token = ''
+    full_data_response = []
+    page = 0
+    
+    while should_repeat:
+        body = get_body(report,page_token)
+        
+        data_response = dispatch_report.query(
+                        name=f'apps/{report["app"]}/{report["type"]}', 
+                        body=body).execute()
+        
+        print(f'{datetime.now()} : Retrieved page {page} of the query {report["type"]}')
+        
+        if "rows" in data_response:
+            full_data_response.extend(data_response["rows"])
+        
+        if "nextPageToken" in data_response:
+            page_token = data_response["nextPageToken"]
+        else:
+            should_repeat = False
+        
+        page += 1
+            
+    writeJsonFile(full_data_response,report["fileName"])
       
 main()

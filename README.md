@@ -4,12 +4,12 @@ This project aims to deepen the understanding of information capture from the Go
 
 Here are some objectives that will be met during the course of development.
 
-
 - [x] Create a functional Google Api authentication method;
 - [x] Create a replicable standard contract model for obtaining reports;
 - [x] Generate JSON files from query responses;
 - [x] Transform JSON files into normalized information files;
-- [ ] Implement a repetition loop to increment reports with a size greater than one thousand objects;
+- [x] Implement a repetition loop to increment reports with a size greater than one thousand objects;
+- [ ] Use dynaminc parameters to period;
 - [ ] Create a playground based on pandas;
 - [ ] Build example datasets from the local folder;
 - [ ] Create an example dashboard;

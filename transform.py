@@ -16,7 +16,7 @@ def read_json_file(jsonFile):
       
 def transform_report_data_to_event_list(reportData):
   event_list = []
-  for row in reportData["rows"]:
+  for row in reportData:
       new_event = {"date": f'{row["startTime"]["year"]}-{row["startTime"]["month"]}-{row["startTime"]["day"]}' }
       if "dimensions" in row:
         for dimension in row["dimensions"]:
