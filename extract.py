@@ -65,19 +65,19 @@ def main():
           "app": "com.picpay",
           "type":"crashRateMetricSet",
           "metrics": ["crashRate","distinctUsers"],
-          "dimensions": ["versionCode"]
+          "dimensions": []
       },
       {
           "app": "com.picpay",
           "type":"anrRateMetricSet",
           "metrics": ["anrRate","distinctUsers"],
-          "dimensions": ["versionCode"]
+          "dimensions": []
       },
       {
           "app": "com.picpay",
           "type":"slowStartRateMetricSet",
           "metrics": ["slowStartRate"],
-          "dimensions": ["startType","versionCode"]
+          "dimensions": ["startType"]
       },
       {
           "app": "com.picpay",
