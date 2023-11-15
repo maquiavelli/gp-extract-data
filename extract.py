@@ -96,11 +96,6 @@ def main():
                       name=f'apps/{report["app"]}/{report["type"]}', 
                       body=body).execute()
       
-      #define if is a overview report
-      
-        #data overview
-        #data by versioncode
-      
       writeJsonFile(dataReponse,report["type"])
 
   # map_metrics(dataReponse, "crashRate")
