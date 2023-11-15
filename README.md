@@ -17,3 +17,4 @@ Here are some objectives that will be met during the course of development.
 - [ ] Refactor code;
 - [ ] Make the "app" field dynamic;
 - [ ] Discovery about the return of the error query;
+- [ ] Move params to environment file;
