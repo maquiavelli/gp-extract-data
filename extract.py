@@ -1,8 +1,10 @@
 import json
-
+from datetime import datetime
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
+
+PARAMS_RAW_FOLDER =  'raw_data'
 
 def get_scoped_credentials():
   SCOPES = ["https://www.googleapis.com/auth/playdeveloperreporting"]
@@ -56,8 +58,10 @@ def get_report_method(structureReport):
       return reporting_user.vitals().errors().counts()
 
 def writeJsonFile(data,fileName):
-  with open(f'raw_data/{fileName}.json', 'w', encoding='utf-8') as f:
+    file = f'{PARAMS_RAW_FOLDER}/{fileName}.json'
+    with open(file, 'w', encoding='utf-8') as f:
           json.dump(data, f, ensure_ascii=False, indent=4)
+    print(f'{datetime.now()} : {file} created!')
 
 def main():
   reports = [
@@ -65,25 +69,57 @@ def main():
           "app": "com.picpay",
           "type":"crashRateMetricSet",
           "metrics": ["crashRate","distinctUsers"],
-          "dimensions": []
+          "dimensions": [],
+          "fileName": "crash-rate-overview"
+      },
+      {
+          "app": "com.picpay",
+          "type":"crashRateMetricSet",
+          "metrics": ["crashRate","distinctUsers"],
+          "dimensions": ["versionCode"],
+          "fileName": "crash-rate-by-version-code"
       },
       {
           "app": "com.picpay",
           "type":"anrRateMetricSet",
           "metrics": ["anrRate","distinctUsers"],
-          "dimensions": []
+          "dimensions": [],
+          "fileName": "anr-rate-overview"
+      },
+      {
+          "app": "com.picpay",
+          "type":"anrRateMetricSet",
+          "metrics": ["anrRate","distinctUsers"],
+          "dimensions": ["versionCode"],
+          "fileName": "anr-rate-by-version-code"
       },
       {
           "app": "com.picpay",
           "type":"slowStartRateMetricSet",
           "metrics": ["slowStartRate"],
-          "dimensions": ["startType"]
+          "dimensions": ["startType"],
+          "fileName": "slow-start-overview"
+      },
+      {
+          "app": "com.picpay",
+          "type":"slowStartRateMetricSet",
+          "metrics": ["slowStartRate"],
+          "dimensions": ["startType","versionCode"],
+          "fileName": "slow-start-by-version-code"
       },
       {
           "app": "com.picpay",
           "type":"errorCountMetricSet",
           "metrics": ["errorReportCount","distinctUsers"],
-          "dimensions": ["reportType"]
+          "dimensions": ["reportType"],
+          "fileName": "error-count-overview"
+      },
+      {
+          "app": "com.picpay",
+          "type":"errorCountMetricSet",
+          "metrics": ["errorReportCount","distinctUsers"],
+          "dimensions": ["reportType","versionCode"],
+          "fileName": "error-count-by-version-code"
       }
   ]
   
@@ -96,8 +132,5 @@ def main():
                       name=f'apps/{report["app"]}/{report["type"]}', 
                       body=body).execute()
       
-      writeJsonFile(dataReponse,report["type"])
-
-  # map_metrics(dataReponse, "crashRate")
-
+      writeJsonFile(dataReponse,report["fileName"])
 main()
