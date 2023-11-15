@@ -4,30 +4,6 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
-def TOREMOVEmap_metrics(crashMetricsData, metricKey):
-  metrics = list(
-      map(
-          lambda row:
-          {
-              "date": f'{row["startTime"]["year"]}-{row["startTime"]["month"]}-{row["startTime"]["day"]}',
-              metricKey: float(next(filter(lambda x: x["metric"] == metricKey, row["metrics"]), None)["decimalValue"]["value"])
-          },
-          crashMetricsData["rows"]
-      )
-  )
-  print(metrics)
-            
-def transform_report_to_event_list(reportData):
-  event_list = []
-  for row in reportData["rows"]:
-      new_event = {"date": f'{row["startTime"]["year"]}-{row["startTime"]["month"]}-{row["startTime"]["day"]}' }
-      for dimension in row["dimensions"]:
-          new_event[dimension["dimension"]] = dimension["stringValue"]
-      for metric in row["metrics"]:
-          new_event[metric["metric"]] = metric["decimalValue"]["value"]
-      event_list.append(new_event)
-  return event_list
-
 def get_scoped_credentials():
   SCOPES = ["https://www.googleapis.com/auth/playdeveloperreporting"]
 
@@ -120,15 +96,13 @@ def main():
                       name=f'apps/{report["app"]}/{report["type"]}', 
                       body=body).execute()
       
+      #define if is a overview report
+      
+        #data overview
+        #data by versioncode
+      
       writeJsonFile(dataReponse,report["type"])
 
   # map_metrics(dataReponse, "crashRate")
-    
-def ToTestreadJsonFiles():
-  # Opening JSON file
-  f = open('output/slowStartRateMetricSet.json')
-  data = json.load(f)
-  events = transform_report_to_event_list(data)
-  print(events)
 
 main()
