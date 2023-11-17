@@ -10,9 +10,9 @@ Here are some objectives that will be met during the course of development.
 - [x] Transform JSON files into normalized information files;
 - [x] Implement a repetition loop to increment reports with a size greater than one thousand objects;
 - [ ] Use dynaminc parameters to period to get raw data;
-- [ ] Create a playground based on pandas;
+- [x] Create a playground MVP based on pandas;
 - [ ] Build example datasets from the local folder;
-- [ ] Create an example dashboard;
+- [x] Create an example dashboard;
 - [ ] Use environment variables instead of a JSON credentials file;
 - [ ] Refactor code;
 - [ ] Make the "app" field dynamic;
@@ -20,4 +20,6 @@ Here are some objectives that will be met during the course of development.
 - [ ] Move params to environment file;
 - [ ] Identify origin for files. Ex.: gp**, appstore**
 - [ ] Create default methods to log;
-- [ ] Merge data frames;
+- [x] Merge data frames;
+- [ ] Verify existant filters. Ex.: If dataset don't have a date value;
+- [ ] Create friendly documentation;
