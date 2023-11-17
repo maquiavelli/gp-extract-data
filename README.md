@@ -18,3 +18,5 @@ Here are some objectives that will be met during the course of development.
 - [ ] Make the "app" field dynamic;
 - [ ] Discovery about the return of the error query;
 - [ ] Move params to environment file;
+- [ ] Identify origin for files. Ex.: gp**, appstore**
+- [ ] Create default methods to log;
