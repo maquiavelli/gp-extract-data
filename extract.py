@@ -10,9 +10,10 @@ from google.oauth2.credentials import Credentials
 from utils.logs import log_type,generate_log
 
 load_dotenv()
-PARAMS_RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
-PARAMS_FULL_LOAD_START_TIME =  os.getenv('PARAMS_FULL_LOAD_START_TIME')
-PARAMS_FULL_LOAD_END_TIME =  os.getenv('PARAMS_FULL_LOAD_END_TIME')
+RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
+FULL_LOAD_START_TIME =  os.getenv('PARAMS_FULL_LOAD_START_TIME')
+FULL_LOAD_END_TIME =  os.getenv('PARAMS_FULL_LOAD_END_TIME')
+BUNDLE_APP = os.getenv("PARAMS_BUNDLE_APP")
 
 def get_scoped_credentials():
   scopes = ["https://www.googleapis.com/auth/playdeveloperreporting"]
@@ -32,8 +33,8 @@ def get_reporting_client():
 def get_body(structureReport,pageToken):
     
     date_format = "%Y-%m-%d"
-    start_date = datetime.strptime(PARAMS_FULL_LOAD_START_TIME,date_format)
-    end_date = datetime.strptime(PARAMS_FULL_LOAD_END_TIME,date_format)
+    start_date = datetime.strptime(FULL_LOAD_START_TIME,date_format)
+    end_date = datetime.strptime(FULL_LOAD_END_TIME,date_format)
 
     body = {
             "metrics": 
@@ -75,7 +76,10 @@ def get_report_method(structureReport):
       return reporting_user.vitals().errors().counts()
 
 def writeJsonFile(data,fileName):
-    file = f'{PARAMS_RAW_FOLDER}/{fileName}.json'
+    if not os.path.exists(f'{RAW_FOLDER}/{BUNDLE_APP}'):
+        os.makedirs(f'{RAW_FOLDER}/{BUNDLE_APP}')
+        
+    file = f'{RAW_FOLDER}/{BUNDLE_APP}/{fileName}.json'
     with open(file, 'w', encoding='utf-8') as f:
           json.dump(data, f, ensure_ascii=False, indent=4)
     generate_log(log_type.FILE_CREATED,f"File {file} created!")
@@ -83,56 +87,48 @@ def writeJsonFile(data,fileName):
 def main():
     reports = [
         {
-            "app": "com.picpay",
             "type":"crashRateMetricSet",
             "metrics": ["crashRate","distinctUsers"],
             "dimensions": [],
             "fileName": "crash-rate-overview"
         },
         {
-            "app": "com.picpay",
             "type":"crashRateMetricSet",
             "metrics": ["crashRate","distinctUsers"],
             "dimensions": ["versionCode"],
             "fileName": "crash-rate-by-version-code"
         },
         {
-            "app": "com.picpay",
             "type":"anrRateMetricSet",
             "metrics": ["anrRate","distinctUsers"],
             "dimensions": [],
             "fileName": "anr-rate-overview"
         },
         {
-            "app": "com.picpay",
             "type":"anrRateMetricSet",
             "metrics": ["anrRate","distinctUsers"],
             "dimensions": ["versionCode"],
             "fileName": "anr-rate-by-version-code"
         },
         {
-            "app": "com.picpay",
             "type":"slowStartRateMetricSet",
             "metrics": ["slowStartRate"],
             "dimensions": ["startType"],
             "fileName": "slow-start-overview"
         },
         {
-            "app": "com.picpay",
             "type":"slowStartRateMetricSet",
             "metrics": ["slowStartRate"],
             "dimensions": ["startType","versionCode"],
             "fileName": "slow-start-by-version-code"
         },
         {
-            "app": "com.picpay",
             "type":"errorCountMetricSet",
             "metrics": ["errorReportCount","distinctUsers"],
             "dimensions": ["reportType"],
             "fileName": "error-count-overview"
         },
         {
-            "app": "com.picpay",
             "type":"errorCountMetricSet",
             "metrics": ["errorReportCount","distinctUsers"],
             "dimensions": ["reportType","versionCode"],
@@ -151,7 +147,7 @@ def main():
         while should_repeat:
             body = get_body(report,page_token)
             data_response = dispatch_report.query(
-                            name=f'apps/{report["app"]}/{report["type"]}', 
+                            name=f'apps/{BUNDLE_APP}/{report["type"]}', 
                             body=body).execute()
             
             generate_log(log_type.DATA_READ,f"Retrieved page {page} of the query {report['type']}")
