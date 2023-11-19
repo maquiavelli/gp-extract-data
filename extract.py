@@ -150,7 +150,6 @@ def main():
 
         while should_repeat:
             body = get_body(report,page_token)
-            
             data_response = dispatch_report.query(
                             name=f'apps/{report["app"]}/{report["type"]}', 
                             body=body).execute()
@@ -169,6 +168,6 @@ def main():
                 
         writeJsonFile(full_data_response,report["fileName"])
     
-    generate_log(log_type.PROCESS_FINISHED,f"Transform process finished!")
+    generate_log(log_type.PROCESS_FINISHED,f"Extract process finished!")
     
 main()
