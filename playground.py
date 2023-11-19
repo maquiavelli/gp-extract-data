@@ -4,7 +4,7 @@ import plotly.express as px
 import seaborn as sns
 
 st.set_page_config(layout="wide")
-# st.title('Playground of Maquiavelli')
+st.title("Maquiavelli's Playground")
 # st.title('_Streamlit_ is :blue[cool] :sunglasses:')
 
 # st.header('This is a header with a divider', divider='rainbow')
