@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 from utils.logs import log_type,generate_log
 
 load_dotenv()
-PARAMS_RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
-PARAMS_DATASETS_FOLDER =  os.getenv('PARAMS_DATASETS_FOLDER')
+RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
+DATASETS_FOLDER =  os.getenv('PARAMS_DATASETS_FOLDER')
+BUNDLE_APP = os.getenv("PARAMS_BUNDLE_APP")
 
 def get_all_json_files_on_folder(folder):
     path_to_json = folder
@@ -31,7 +32,11 @@ def transform_report_data_to_event_list(reportData):
   return event_list
 
 def write_csv_file(data,fileName):
-    csvFile = f'{PARAMS_DATASETS_FOLDER}/{fileName}.csv'
+    datasets_app_folder = f'{DATASETS_FOLDER}/{BUNDLE_APP}'
+    if not os.path.exists(datasets_app_folder):
+        os.makedirs(datasets_app_folder)
+        
+    csvFile = f'{datasets_app_folder}/{fileName}.csv'
     
     keys = data[0].keys()
     with open(csvFile, 'w', newline='') as output_file:
@@ -42,16 +47,22 @@ def write_csv_file(data,fileName):
     generate_log(log_type.FILE_CREATED,f"{csvFile} created!")
 
 def main():
-    jsonFiles = get_all_json_files_on_folder(PARAMS_RAW_FOLDER)
-    
-    for file in jsonFiles:
-        reportData = read_json_file(f'{PARAMS_RAW_FOLDER}/{file}')
-        generate_log(log_type.FILE_READ,f"File read {file}")
-        eventList = transform_report_data_to_event_list(reportData)
-
-        cleanFileName = file.replace('.json','')        
-        write_csv_file(eventList,cleanFileName)
-
-    generate_log(log_type.PROCESS_FINISHED,f"Transform process finished!")
+    try:
+        jsonFiles = get_all_json_files_on_folder(f'{RAW_FOLDER}/{BUNDLE_APP}')
         
+        if len(jsonFiles) > 0:
+            for file in jsonFiles:
+                reportData = read_json_file(f'{RAW_FOLDER}/{BUNDLE_APP}/{file}')
+                generate_log(log_type.FILE_READ,f"File read {file}")
+                eventList = transform_report_data_to_event_list(reportData)
+
+                cleanFileName = file.replace('.json','')        
+                write_csv_file(eventList,cleanFileName)
+
+            generate_log(log_type.PROCESS_FINISHED,f"Transform process finished!")
+        else:
+            generate_log(log_type.FILE_NOT_FOUND,f"Compatible files for transformation not found.")
+            
+    except FileNotFoundError :
+        generate_log(log_type.FILE_NOT_FOUND,f"Compatible files for transformation not found.")
 main()

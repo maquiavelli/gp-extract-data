@@ -16,6 +16,7 @@ class log_type:
     FILE_CREATED = f"{colors.OKGREEN} {datetime.now()} - "
     FILE_READ = f"{colors.OKGREEN} {datetime.now()} - "
     PROCESS_FINISHED = f"{colors.ENDC} {datetime.now()} - "
+    FILE_NOT_FOUND = f"{colors.WARNING} {datetime.now()} - "
 
 
 def generate_log(log_type,content):
