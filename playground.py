@@ -111,19 +111,6 @@ fig_slow_start = px.line(df_full_overview_filtered,
                          markers=False)
 col1.plotly_chart(fig_slow_start)
 
-fig_anrs_rate = px.bar(df_full_overview_filtered, 
-                       x="date", 
-                       y="anr_rate", 
-                       title="Taxa de ANRs por dia")
-col3.plotly_chart(fig_anrs_rate)
-
-fig_crashes_rate = px.bar(df_full_overview_filtered, 
-                       x="date", 
-                       y="crash_rate", 
-                       title="Taxa de Crashes por dia")
-
-col4.plotly_chart(fig_crashes_rate)
-
 x_vars_anr_rate = ["slow_start_hot","slow_start_warm","slow_start_cold"]
 y_vars1_anr_rate = ["anr_rate"]
 
@@ -140,6 +127,20 @@ fig_pairplot_crash_rate = sns.pairplot(data=df_full_overview_filtered,
 
 col2.pyplot(fig_pairplot_anr_rate)
 col2.pyplot(fig_pairplot_crash_rate)
+
+fig_anrs_rate = px.bar(df_full_overview_filtered, 
+                       x="date", 
+                       y="anr_rate", 
+                       title="Taxa de ANRs por dia")
+col3.plotly_chart(fig_anrs_rate)
+
+fig_crashes_rate = px.bar(df_full_overview_filtered, 
+                       x="date", 
+                       y="crash_rate", 
+                       title="Taxa de Crashes por dia")
+
+col4.plotly_chart(fig_crashes_rate)
+
 
 # fig_pairplot_test = sns.heatmap(df_full_overview_filtered,
 #                                 xticklabels=["slow_start_hot","slow_start_warm","slow_start_cold"],
