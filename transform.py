@@ -3,6 +3,7 @@ import os
 import csv
 from datetime import datetime
 from dotenv import load_dotenv
+from utils.logs import log_type,generate_log
 
 load_dotenv()
 PARAMS_RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
@@ -38,17 +39,19 @@ def write_csv_file(data,fileName):
         dict_writer.writeheader()
         dict_writer.writerows(data)
         
-    print(f'{datetime.now()} : {csvFile} created!')
+    generate_log(log_type.FILE_CREATED,f"{csvFile} created!")
 
 def main():
     jsonFiles = get_all_json_files_on_folder(PARAMS_RAW_FOLDER)
     
     for file in jsonFiles:
         reportData = read_json_file(f'{PARAMS_RAW_FOLDER}/{file}')
-        print(f'File read {file}')
+        generate_log(log_type.FILE_READ,f"File read {file}")
         eventList = transform_report_data_to_event_list(reportData)
 
         cleanFileName = file.replace('.json','')        
         write_csv_file(eventList,cleanFileName)
+
+    generate_log(log_type.PROCESS_FINISHED,f"Transform process finished!")
         
 main()

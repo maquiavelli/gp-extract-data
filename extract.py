@@ -7,8 +7,12 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
+from utils.logs import log_type,generate_log
+
 load_dotenv()
 PARAMS_RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
+PARAMS_FULL_LOAD_START_TIME =  os.getenv('PARAMS_FULL_LOAD_START_TIME')
+PARAMS_FULL_LOAD_END_TIME =  os.getenv('PARAMS_FULL_LOAD_END_TIME')
 
 def get_scoped_credentials():
   scopes = ["https://www.googleapis.com/auth/playdeveloperreporting"]
@@ -26,29 +30,35 @@ def get_reporting_client():
                       cache_discovery=False)
 
 def get_body(structureReport,pageToken):
-  body = {
-          "metrics": 
-              structureReport["metrics"],
-          "dimensions": 
-              structureReport["dimensions"],
-          "timelineSpec": 
-              {
-              "aggregationPeriod": "DAILY",
-              "startTime": {
-                      "day": 1,
-                      "month": 7,
-                      "year": 2023
-                  },
-              "endTime": 
-                  {
-                      "day": 1,
-                      "month": 10,
-                      "year": 2023
-                  }
-              },
+    
+    date_format = "%Y-%m-%d"
+    start_date = datetime.strptime(PARAMS_FULL_LOAD_START_TIME,date_format)
+    end_date = datetime.strptime(PARAMS_FULL_LOAD_END_TIME,date_format)
+
+    body = {
+            "metrics": 
+                structureReport["metrics"],
+            "dimensions": 
+                structureReport["dimensions"],
+            "timelineSpec": 
+                {
+                "aggregationPeriod": "DAILY",
+                "startTime": {
+                        "day": start_date.day,
+                        "month": start_date.month,
+                        "year": start_date.year
+                    },
+                "endTime": 
+                    {
+                        "day": end_date.day,
+                        "month": end_date.month,
+                        "year": end_date.year
+                    }
+                },
             "pageToken": pageToken
-          }
-  return body
+            }
+    
+    return body
     
 def get_report_method(structureReport):
   reportType = structureReport["type"]
@@ -68,95 +78,97 @@ def writeJsonFile(data,fileName):
     file = f'{PARAMS_RAW_FOLDER}/{fileName}.json'
     with open(file, 'w', encoding='utf-8') as f:
           json.dump(data, f, ensure_ascii=False, indent=4)
-    print(f'{datetime.now()} : File {file} created!')
+    generate_log(log_type.FILE_CREATED,f"File {file} created!")
 
 def main():
-  reports = [
-      {
-          "app": "com.picpay",
-          "type":"crashRateMetricSet",
-          "metrics": ["crashRate","distinctUsers"],
-          "dimensions": [],
-          "fileName": "crash-rate-overview"
-      },
-      {
-          "app": "com.picpay",
-          "type":"crashRateMetricSet",
-          "metrics": ["crashRate","distinctUsers"],
-          "dimensions": ["versionCode"],
-          "fileName": "crash-rate-by-version-code"
-      },
-      {
-          "app": "com.picpay",
-          "type":"anrRateMetricSet",
-          "metrics": ["anrRate","distinctUsers"],
-          "dimensions": [],
-          "fileName": "anr-rate-overview"
-      },
-      {
-          "app": "com.picpay",
-          "type":"anrRateMetricSet",
-          "metrics": ["anrRate","distinctUsers"],
-          "dimensions": ["versionCode"],
-          "fileName": "anr-rate-by-version-code"
-      },
-      {
-          "app": "com.picpay",
-          "type":"slowStartRateMetricSet",
-          "metrics": ["slowStartRate"],
-          "dimensions": ["startType"],
-          "fileName": "slow-start-overview"
-      },
-      {
-          "app": "com.picpay",
-          "type":"slowStartRateMetricSet",
-          "metrics": ["slowStartRate"],
-          "dimensions": ["startType","versionCode"],
-          "fileName": "slow-start-by-version-code"
-      },
-      {
-          "app": "com.picpay",
-          "type":"errorCountMetricSet",
-          "metrics": ["errorReportCount","distinctUsers"],
-          "dimensions": ["reportType"],
-          "fileName": "error-count-overview"
-      },
-      {
-          "app": "com.picpay",
-          "type":"errorCountMetricSet",
-          "metrics": ["errorReportCount","distinctUsers"],
-          "dimensions": ["reportType","versionCode"],
-          "fileName": "error-count-by-version-code"
-      }
-  ]
+    reports = [
+        {
+            "app": "com.picpay",
+            "type":"crashRateMetricSet",
+            "metrics": ["crashRate","distinctUsers"],
+            "dimensions": [],
+            "fileName": "crash-rate-overview"
+        },
+        {
+            "app": "com.picpay",
+            "type":"crashRateMetricSet",
+            "metrics": ["crashRate","distinctUsers"],
+            "dimensions": ["versionCode"],
+            "fileName": "crash-rate-by-version-code"
+        },
+        {
+            "app": "com.picpay",
+            "type":"anrRateMetricSet",
+            "metrics": ["anrRate","distinctUsers"],
+            "dimensions": [],
+            "fileName": "anr-rate-overview"
+        },
+        {
+            "app": "com.picpay",
+            "type":"anrRateMetricSet",
+            "metrics": ["anrRate","distinctUsers"],
+            "dimensions": ["versionCode"],
+            "fileName": "anr-rate-by-version-code"
+        },
+        {
+            "app": "com.picpay",
+            "type":"slowStartRateMetricSet",
+            "metrics": ["slowStartRate"],
+            "dimensions": ["startType"],
+            "fileName": "slow-start-overview"
+        },
+        {
+            "app": "com.picpay",
+            "type":"slowStartRateMetricSet",
+            "metrics": ["slowStartRate"],
+            "dimensions": ["startType","versionCode"],
+            "fileName": "slow-start-by-version-code"
+        },
+        {
+            "app": "com.picpay",
+            "type":"errorCountMetricSet",
+            "metrics": ["errorReportCount","distinctUsers"],
+            "dimensions": ["reportType"],
+            "fileName": "error-count-overview"
+        },
+        {
+            "app": "com.picpay",
+            "type":"errorCountMetricSet",
+            "metrics": ["errorReportCount","distinctUsers"],
+            "dimensions": ["reportType","versionCode"],
+            "fileName": "error-count-by-version-code"
+        }
+    ]
   
-  for report in reports:  
-    dispatch_report = get_report_method(report)
-    
-    should_repeat = True
-    page_token = ''
-    full_data_response = []
-    page = 0
-    
-    while should_repeat:
-        body = get_body(report,page_token)
+    for report in reports:  
+        dispatch_report = get_report_method(report)
         
-        data_response = dispatch_report.query(
-                        name=f'apps/{report["app"]}/{report["type"]}', 
-                        body=body).execute()
-        
-        print(f'{datetime.now()} : Retrieved page {page} of the query {report["type"]}')
-        
-        if "rows" in data_response:
-            full_data_response.extend(data_response["rows"])
-        
-        if "nextPageToken" in data_response:
-            page_token = data_response["nextPageToken"]
-        else:
-            should_repeat = False
-        
-        page += 1
+        should_repeat = True
+        page_token = ''
+        full_data_response = []
+        page = 0
+
+        while should_repeat:
+            body = get_body(report,page_token)
             
-    writeJsonFile(full_data_response,report["fileName"])
-      
+            data_response = dispatch_report.query(
+                            name=f'apps/{report["app"]}/{report["type"]}', 
+                            body=body).execute()
+            
+            generate_log(log_type.DATA_READ,f"Retrieved page {page} of the query {report['type']}")
+            
+            if "rows" in data_response:
+                full_data_response.extend(data_response["rows"])
+            
+            if "nextPageToken" in data_response:
+                page_token = data_response["nextPageToken"]
+            else:
+                should_repeat = False
+            
+            page += 1
+                
+        writeJsonFile(full_data_response,report["fileName"])
+    
+    generate_log(log_type.PROCESS_FINISHED,f"Transform process finished!")
+    
 main()
