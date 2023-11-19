@@ -76,10 +76,11 @@ def get_report_method(structureReport):
       return reporting_user.vitals().errors().counts()
 
 def writeJsonFile(data,fileName):
-    if not os.path.exists(f'{RAW_FOLDER}/{BUNDLE_APP}'):
-        os.makedirs(f'{RAW_FOLDER}/{BUNDLE_APP}')
+    raw_data_app_folder = f'{RAW_FOLDER}/{BUNDLE_APP}'
+    if not os.path.exists(raw_data_app_folder):
+        os.makedirs(raw_data_app_folder)
         
-    file = f'{RAW_FOLDER}/{BUNDLE_APP}/{fileName}.json'
+    file = f'{raw_data_app_folder}/{fileName}.json'
     with open(file, 'w', encoding='utf-8') as f:
           json.dump(data, f, ensure_ascii=False, indent=4)
     generate_log(log_type.FILE_CREATED,f"File {file} created!")
