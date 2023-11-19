@@ -11,15 +11,16 @@ Here are some objectives that will be met during the course of development.
 - [x] Implement a repetition loop to increment reports with a size greater than one thousand objects;
 - [ ] Use dynaminc parameters to period to get raw data;
 - [x] Create a playground MVP based on pandas;
-- [ ] Build example datasets from the local folder;
+- [x] Build example datasets from the local folder;
 - [x] Create an example dashboard;
-- [ ] Use environment variables instead of a JSON credentials file;
+- [x] Use environment variables instead of a JSON credentials file;
 - [ ] Refactor code;
 - [ ] Make the "app" field dynamic;
 - [ ] Discovery about the return of the error query;
-- [ ] Move params to environment file;
+- [x] Move params to environment file;
 - [ ] Identify origin for files. Ex.: gp**, appstore**
 - [ ] Create default methods to log;
 - [x] Merge data frames;
 - [ ] Verify existant filters. Ex.: If dataset don't have a date value;
 - [ ] Create friendly documentation;
+- [ ] Get massive data;

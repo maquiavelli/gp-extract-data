@@ -2,9 +2,11 @@ import json
 import os
 import csv
 from datetime import datetime
+from dotenv import load_dotenv
 
-PARAMS_RAW_FOLDER =  'raw_data'
-PARAMS_DATA_FOLDER =  'data'
+load_dotenv()
+PARAMS_RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
+PARAMS_DATASETS_FOLDER =  os.getenv('PARAMS_DATASETS_FOLDER')
 
 def get_all_json_files_on_folder(folder):
     path_to_json = folder
@@ -28,7 +30,7 @@ def transform_report_data_to_event_list(reportData):
   return event_list
 
 def write_csv_file(data,fileName):
-    csvFile = f'{PARAMS_DATA_FOLDER}/{fileName}.csv'
+    csvFile = f'{PARAMS_DATASETS_FOLDER}/{fileName}.csv'
     
     keys = data[0].keys()
     with open(csvFile, 'w', newline='') as output_file:

@@ -1,16 +1,22 @@
 import json
+from dotenv import load_dotenv
+import os
+
 from datetime import datetime
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
-PARAMS_RAW_FOLDER =  'raw_data'
+load_dotenv()
+PARAMS_RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
 
 def get_scoped_credentials():
-  SCOPES = ["https://www.googleapis.com/auth/playdeveloperreporting"]
+  scopes = ["https://www.googleapis.com/auth/playdeveloperreporting"]
+  
+  credentials_url = os.getenv('CREDENTIAL_URL_GOOGLE_PLAY_DEV_REPORTING')
 
-  credentials = service_account.Credentials.from_service_account_file('credentials.json')
-  return credentials.with_scopes(SCOPES)
+  credentials = service_account.Credentials.from_service_account_file(credentials_url)
+  return credentials.with_scopes(scopes)
 
 def get_reporting_client():
   scoped_credentials = get_scoped_credentials()
