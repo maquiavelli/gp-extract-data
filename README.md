@@ -23,7 +23,7 @@ Here are some objectives that will be met during the course of development.
 - [ ] Discovery about the return of the Error Report query;
 - [ ] Verify existant filters. Ex.: If dataset don't have a date value;
 - [ ] Create friendly documentation;
-- [ ] Get massive data;
+- [x] Get massive data;
 - [ ] Fix without null dates on merge datasets on Playground;
 - [ ] Create workload for ingest data on BigQuery;
 - [ ] Create module to increment data;
