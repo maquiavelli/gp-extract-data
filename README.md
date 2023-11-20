@@ -1,4 +1,4 @@
-# Play Developer Reporting API ETL Playground
+# Google Play Developer Reporting API ETL Playground
 
 This project aims to deepen the understanding of information capture from the Google Play Developer Reporting Api.
 
