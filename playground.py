@@ -13,7 +13,7 @@ st.title("Maquiavelli's Playground")
 
 #ANR_RATE_OVERVIEW DATASET
 df_anr_rate_overview = pd.read_csv(
-                            "datasets/com.picpay/anr-rate-overview.csv", 
+                            "datasets/com.sample.app/anr-rate-overview.csv", 
                             sep="," , 
                             decimal=".")
 #REDEFINE COLUMNS
@@ -33,7 +33,7 @@ df_anr_rate_overview=df_anr_rate_overview.sort_values("date")
 
 #CRASH_RATE_OVERVIEW DATASET
 df_crash_rate_overview = pd.read_csv(
-                            "datasets/com.picpay/crash-rate-overview.csv", 
+                            "datasets/com.sample.app/crash-rate-overview.csv", 
                             sep="," , 
                             decimal=".")
 #REDEFINE COLUMNS
@@ -54,7 +54,7 @@ df_crash_rate_overview=df_crash_rate_overview.sort_values("date")
 
 #SLOW_START_RATE DATASET
 df_slow_start_overview = pd.read_csv(
-                                "datasets/com.picpay/slow-start-overview.csv", 
+                                "datasets/com.sample.app/slow-start-overview.csv", 
                                 sep="," , 
                                 decimal=".")
 df_slow_start_overview = df_slow_start_overview.pivot(
