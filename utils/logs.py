@@ -12,13 +12,12 @@ class colors:
     UNDERLINE = '\033[4m'
     
 class log_type:
-    DATA_READ = f"{colors.OKCYAN} {datetime.now()} - "
-    FILE_CREATED = f"{colors.OKGREEN} {datetime.now()} - "
-    FILE_READ = f"{colors.OKGREEN} {datetime.now()} - "
-    PROCESS_FINISHED = f"{colors.ENDC} {datetime.now()} - "
-    FILE_NOT_FOUND = f"{colors.WARNING} {datetime.now()} - "
-
+    DATA_READ = colors.OKCYAN
+    FILE_CREATED = colors.OKGREEN
+    FILE_READ = colors.OKGREEN
+    PROCESS_FINISHED = colors.ENDC
+    FILE_NOT_FOUND = colors.WARNING
 
 def generate_log(log_type,content):
-    print(log_type + content)
+    print(f"{log_type} {datetime.now()} - {content}")
     

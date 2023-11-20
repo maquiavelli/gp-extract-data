@@ -11,7 +11,7 @@ Here are some objectives that will be met during the course of development.
 - [x] Implement a repetition loop to increment reports with a size greater than one thousand objects;
 - [x] Use environments parameters to period to get raw data;
 - [x] Create a playground MVP based on pandas;
-- [x] Build example datasets from the local folder;
+- [x] Build example datasets from the local folder;-
 - [x] Create an example dashboard;
 - [x] Use environment variables instead of a JSON credentials file;
 - [x] Move params to environment file;
@@ -19,7 +19,7 @@ Here are some objectives that will be met during the course of development.
 - [x] Create folder datasets for the different apps;
 - [x] Create default methods to log;
 - [x] Merge data frames;
-- [ ] Refactor code;
+- [ ] Refactor code;s
 - [ ] Discovery about the return of the Error Report query;
 - [ ] Verify existant filters. Ex.: If dataset don't have a date value;
 - [ ] Create friendly documentation;
@@ -27,7 +27,7 @@ Here are some objectives that will be met during the course of development.
 - [ ] Fix without null dates on merge datasets on Playground;
 - [ ] Create workload for ingest data on BigQuery;
 - [ ] Create module to increment data;
-- [ ] Fix datetime from logs;
+- [x] Fix datetime from logs;
 - [ ] Recognize fresh data;
 - [x] Disable ErrorCount until you understand its real use
 - [x] Separate reports dictionary in json file
