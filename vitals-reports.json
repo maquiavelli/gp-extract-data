@@ -1,0 +1,38 @@
+[
+    {
+        "type":"crashRateMetricSet",
+        "metrics": ["crashRate","distinctUsers"],
+        "dimensions": [],
+        "fileName": "crash-rate-overview"
+    },
+    {
+        "type":"crashRateMetricSet",
+        "metrics": ["crashRate","distinctUsers"],
+        "dimensions": ["versionCode"],
+        "fileName": "crash-rate-by-version-code"
+    },
+    {
+        "type":"anrRateMetricSet",
+        "metrics": ["anrRate","distinctUsers"],
+        "dimensions": [],
+        "fileName": "anr-rate-overview"
+    },
+    {
+        "type":"anrRateMetricSet",
+        "metrics": ["anrRate","distinctUsers"],
+        "dimensions": ["versionCode"],
+        "fileName": "anr-rate-by-version-code"
+    },
+    {
+        "type":"slowStartRateMetricSet",
+        "metrics": ["slowStartRate"],
+        "dimensions": ["startType"],
+        "fileName": "slow-start-overview"
+    },
+    {
+        "type":"slowStartRateMetricSet",
+        "metrics": ["slowStartRate"],
+        "dimensions": ["startType","versionCode"],
+        "fileName": "slow-start-by-version-code"
+    }
+]
