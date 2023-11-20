@@ -1,7 +1,8 @@
 import json
-from dotenv import load_dotenv
 import os
 
+from dotenv import load_dotenv
+from enum import Enum
 from datetime import datetime
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -9,11 +10,27 @@ from google.oauth2.credentials import Credentials
 
 from utils.logs import log_type,generate_log
 
+#ENVIRONMENT CONFIG
 load_dotenv()
 RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
 FULL_LOAD_START_TIME =  os.getenv('PARAMS_FULL_LOAD_START_TIME')
 FULL_LOAD_END_TIME =  os.getenv('PARAMS_FULL_LOAD_END_TIME')
 BUNDLE_APP = os.getenv("PARAMS_BUNDLE_APP")
+
+#JSON CONSTANTS
+METRICS_KEY = "metrics"
+DIMENSIONS_KEY = "dimensions"
+TIMELINE_SPEC_KEY = "timelineSpec"
+AGGREGATION_PERIOD_KEY = "aggregationPeriod"
+START_TIME_KEY = "startTime"
+END_TIME_KEY = "endTime"
+PAGE_TOKEN_KEY = "pageToken"
+
+class ReportType(Enum):
+    CRASH_RATE = "crashRateMetricSet"
+    SLOW_START_RATE = "slowStartRateMetricSet"
+    ANR_RATE = "anrRateMetricSet"
+    ERROR_COUNT = "errorCountMetricSet"
 
 def get_scoped_credentials():
   scopes = ["https://www.googleapis.com/auth/playdeveloperreporting"]
@@ -30,63 +47,58 @@ def get_reporting_client():
                       credentials=scoped_credentials, 
                       cache_discovery=False)
 
-def get_body(structureReport,pageToken):
-    
-    date_format = "%Y-%m-%d"
-    start_date = datetime.strptime(FULL_LOAD_START_TIME,date_format)
-    end_date = datetime.strptime(FULL_LOAD_END_TIME,date_format)
+def get_body(structure_report, page_token):
+
+    start_date = datetime.strptime(FULL_LOAD_START_TIME, "%Y-%m-%d")
+    end_date = datetime.strptime(FULL_LOAD_END_TIME, "%Y-%m-%d")
 
     body = {
-            "metrics": 
-                structureReport["metrics"],
-            "dimensions": 
-                structureReport["dimensions"],
-            "timelineSpec": 
-                {
-                "aggregationPeriod": "DAILY",
-                "startTime": {
-                        "day": start_date.day,
-                        "month": start_date.month,
-                        "year": start_date.year
-                    },
-                "endTime": 
-                    {
-                        "day": end_date.day,
-                        "month": end_date.month,
-                        "year": end_date.year
-                    }
-                },
-            "pageToken": pageToken
+        METRICS_KEY: structure_report["metrics"],
+        DIMENSIONS_KEY: structure_report["dimensions"],
+        TIMELINE_SPEC_KEY: {
+            AGGREGATION_PERIOD_KEY: "DAILY",
+            START_TIME_KEY: {
+                "day": start_date.day,
+                "month": start_date.month,
+                "year": start_date.year
+            },
+            END_TIME_KEY: {
+                "day": end_date.day,
+                "month": end_date.month,
+                "year": end_date.year
             }
+        },
+        PAGE_TOKEN_KEY: page_token
+    }
     
     return body
-    
-def get_report_method(structureReport):
-  reportType = structureReport["type"]
-  
-  reporting_user = get_reporting_client()
-  
-  if reportType == "crashRateMetricSet":
-      return reporting_user.vitals().crashrate()
-  elif reportType == "slowStartRateMetricSet":
-      return reporting_user.vitals().slowstartrate()
-  elif reportType == "anrRateMetricSet":
-      return reporting_user.vitals().anrrate()
-  elif reportType == "errorCountMetricSet":
-      return reporting_user.vitals().errors().counts()
 
-def writeJsonFile(data,fileName):
+def get_report_method(structure_report):
+    report_type = ReportType(structure_report["type"])
+
+    reporting_user = get_reporting_client()
+
+    if report_type == ReportType.CRASH_RATE:
+        return reporting_user.vitals().crashrate()
+    elif report_type == ReportType.SLOW_START_RATE:
+        return reporting_user.vitals().slowstartrate()
+    elif report_type == ReportType.ANR_RATE:
+        return reporting_user.vitals().anrrate()
+    elif report_type == ReportType.ERROR_COUNT:
+        return reporting_user.vitals().errors().counts()
+
+def writeJsonFile(data,file_name):
     raw_data_app_folder = f'{RAW_FOLDER}/{BUNDLE_APP}'
     if not os.path.exists(raw_data_app_folder):
         os.makedirs(raw_data_app_folder)
         
-    file = f'{raw_data_app_folder}/{fileName}.json'
+    file = f'{raw_data_app_folder}/{file_name}.json'
     with open(file, 'w', encoding='utf-8') as f:
           json.dump(data, f, ensure_ascii=False, indent=4)
     generate_log(log_type.FILE_CREATED,f"File {file} created!")
 
-def read_json_file(jsonFile):
-    f = open(jsonFile)
+def read_json_file(json_file):
+    f = open(json_file)
     return json.load(f)
 
 def main():
