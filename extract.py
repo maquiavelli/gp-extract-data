@@ -85,57 +85,12 @@ def writeJsonFile(data,fileName):
           json.dump(data, f, ensure_ascii=False, indent=4)
     generate_log(log_type.FILE_CREATED,f"File {file} created!")
 
+def read_json_file(jsonFile):
+    f = open(jsonFile)
+    return json.load(f)
+
 def main():
-    reports = [
-        {
-            "type":"crashRateMetricSet",
-            "metrics": ["crashRate","distinctUsers"],
-            "dimensions": [],
-            "fileName": "crash-rate-overview"
-        },
-        {
-            "type":"crashRateMetricSet",
-            "metrics": ["crashRate","distinctUsers"],
-            "dimensions": ["versionCode"],
-            "fileName": "crash-rate-by-version-code"
-        },
-        {
-            "type":"anrRateMetricSet",
-            "metrics": ["anrRate","distinctUsers"],
-            "dimensions": [],
-            "fileName": "anr-rate-overview"
-        },
-        {
-            "type":"anrRateMetricSet",
-            "metrics": ["anrRate","distinctUsers"],
-            "dimensions": ["versionCode"],
-            "fileName": "anr-rate-by-version-code"
-        },
-        {
-            "type":"slowStartRateMetricSet",
-            "metrics": ["slowStartRate"],
-            "dimensions": ["startType"],
-            "fileName": "slow-start-overview"
-        },
-        {
-            "type":"slowStartRateMetricSet",
-            "metrics": ["slowStartRate"],
-            "dimensions": ["startType","versionCode"],
-            "fileName": "slow-start-by-version-code"
-        },
-        {
-            "type":"errorCountMetricSet",
-            "metrics": ["errorReportCount","distinctUsers"],
-            "dimensions": ["reportType"],
-            "fileName": "error-count-overview"
-        },
-        {
-            "type":"errorCountMetricSet",
-            "metrics": ["errorReportCount","distinctUsers"],
-            "dimensions": ["reportType","versionCode"],
-            "fileName": "error-count-by-version-code"
-        }
-    ]
+    reports = read_json_file("vitals-reports.json")
   
     for report in reports:  
         dispatch_report = get_report_method(report)
