@@ -19,7 +19,7 @@ Here are some objectives that will be met during the course of development.
 - [x] Create folder datasets for the different apps;
 - [x] Create default methods to log;
 - [x] Merge data frames;
-- [ ] Refactor code;s
+- [x] Refactor code;
 - [ ] Discovery about the return of the Error Report query;
 - [ ] Verify existant filters. Ex.: If dataset don't have a date value;
 - [ ] Create friendly documentation;

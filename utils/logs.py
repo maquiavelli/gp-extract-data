@@ -14,7 +14,7 @@ class colors:
 class log_type:
     DATA_READ = colors.OKCYAN
     FILE_CREATED = colors.OKGREEN
-    FILE_READ = colors.OKGREEN
+    FILE_READ = colors.OKCYAN
     PROCESS_FINISHED = colors.ENDC
     FILE_NOT_FOUND = colors.WARNING
 
