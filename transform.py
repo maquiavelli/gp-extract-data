@@ -32,8 +32,8 @@ def transform_report_row(row):
         new_event.update({metric["metric"]: metric["decimalValue"]["value"] for metric in row["metrics"]})
     return new_event
 
-def transform_report_data_to_event_list(reportData):
-    return [transform_report_row(row) for row in reportData]
+def transform_report_data_to_event_list(report_data):
+    return [transform_report_row(row) for row in report_data]
 
 def write_csv_file(data, file_name):
     datasets_app_folder = os.path.join(DATASETS_FOLDER, BUNDLE_APP)
