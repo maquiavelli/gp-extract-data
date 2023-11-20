@@ -29,5 +29,5 @@ Here are some objectives that will be met during the course of development.
 - [ ] Create module to increment data;
 - [ ] Fix datetime from logs;
 - [ ] Recognize fresh data;
-- [ ] Disable ErrorCount until you understand its real use
+- [x] Disable ErrorCount until you understand its real use
 - [x] Separate reports dictionary in json file

@@ -34,17 +34,5 @@
         "metrics": ["slowStartRate"],
         "dimensions": ["startType","versionCode"],
         "fileName": "slow-start-by-version-code"
-    },
-    {
-        "type":"errorCountMetricSet",
-        "metrics": ["errorReportCount","distinctUsers"],
-        "dimensions": ["reportType"],
-        "fileName": "error-count-overview"
-    },
-    {
-        "type":"errorCountMetricSet",
-        "metrics": ["errorReportCount","distinctUsers"],
-        "dimensions": ["reportType","versionCode"],
-        "fileName": "error-count-by-version-code"
     }
 ]
