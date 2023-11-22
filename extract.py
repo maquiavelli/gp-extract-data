@@ -101,6 +101,13 @@ def read_json_file(json_file):
     f = open(json_file)
     return json.load(f)
 
+def get_freshness_date(structure_report):
+    dispatch_report = get_report_method(structure_report)
+    data_response = dispatch_report.get(
+                            name=f'apps/{BUNDLE_APP}/{structure_report["type"]}'
+                            ).execute()
+    return data_response
+
 def main():
     reports = read_json_file("vitals-reports.json")
   
