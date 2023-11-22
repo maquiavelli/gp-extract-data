@@ -26,6 +26,9 @@ START_TIME_KEY = "startTime"
 END_TIME_KEY = "endTime"
 PAGE_TOKEN_KEY = "pageToken"
 
+#PARAMS
+AGGREGATION_DEFAULT = "DAILY"
+
 class ReportType(Enum):
     CRASH_RATE = "crashRateMetricSet"
     SLOW_START_RATE = "slowStartRateMetricSet"
@@ -56,7 +59,7 @@ def get_body(structure_report, page_token):
         METRICS_KEY: structure_report["metrics"],
         DIMENSIONS_KEY: structure_report["dimensions"],
         TIMELINE_SPEC_KEY: {
-            AGGREGATION_PERIOD_KEY: "DAILY",
+            AGGREGATION_PERIOD_KEY: AGGREGATION_DEFAULT,
             START_TIME_KEY: {
                 "day": start_date.day,
                 "month": start_date.month,
@@ -106,12 +109,25 @@ def get_freshness_date(structure_report):
     data_response = dispatch_report.get(
                             name=f'apps/{BUNDLE_APP}/{structure_report["type"]}'
                             ).execute()
-    return data_response
+    
+    freshness_info = next(
+                        filter(
+                            lambda item:
+                                item["aggregationPeriod"] == AGGREGATION_DEFAULT,
+                                data_response["freshnessInfo"]["freshnesses"]
+                        )
+                    )
+    
+    freshness_date_year = freshness_info["latestEndTime"]["year"]
+    freshness_date_month = freshness_info["latestEndTime"]["month"]
+    freshness_date_day = freshness_info["latestEndTime"]["day"]
+
+    return datetime.strptime(f'{freshness_date_year}-{freshness_date_month}-{freshness_date_day}', "%Y-%m-%d").date()
 
 def main():
     reports = read_json_file("vitals-reports.json")
   
-    for report in reports:  
+    for report in reports:
         dispatch_report = get_report_method(report)
         
         should_repeat = True
