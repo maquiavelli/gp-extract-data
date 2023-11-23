@@ -28,6 +28,6 @@ Here are some objectives that will be met during the course of development.
 - [ ] Create workload for ingest data on BigQuery;
 - [ ] Create module to increment data;
 - [x] Fix datetime from logs;
-- [ ] Recognize fresh data;
+- [x] Recognize fresh data;
 - [x] Disable ErrorCount until you understand its real use
 - [x] Separate reports dictionary in json file
