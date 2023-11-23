@@ -13,8 +13,7 @@ from utils.logs import log_type,generate_log
 #ENVIRONMENT CONFIG
 load_dotenv()
 RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
-FULL_LOAD_START_TIME =  os.getenv('PARAMS_FULL_LOAD_START_TIME')
-FULL_LOAD_END_TIME =  os.getenv('PARAMS_FULL_LOAD_END_TIME')
+START_TIME =  os.getenv('PARAMS_START_TIME')
 BUNDLE_APP = os.getenv("PARAMS_BUNDLE_APP")
 
 #JSON CONSTANTS
@@ -25,6 +24,9 @@ AGGREGATION_PERIOD_KEY = "aggregationPeriod"
 START_TIME_KEY = "startTime"
 END_TIME_KEY = "endTime"
 PAGE_TOKEN_KEY = "pageToken"
+
+#PARAMS
+AGGREGATION_DEFAULT = "DAILY"
 
 class ReportType(Enum):
     CRASH_RATE = "crashRateMetricSet"
@@ -47,16 +49,13 @@ def get_reporting_client():
                       credentials=scoped_credentials, 
                       cache_discovery=False)
 
-def get_body(structure_report, page_token):
-
-    start_date = datetime.strptime(FULL_LOAD_START_TIME, "%Y-%m-%d")
-    end_date = datetime.strptime(FULL_LOAD_END_TIME, "%Y-%m-%d")
+def get_body(structure_report, page_token,start_date, end_date):
 
     body = {
         METRICS_KEY: structure_report["metrics"],
         DIMENSIONS_KEY: structure_report["dimensions"],
         TIMELINE_SPEC_KEY: {
-            AGGREGATION_PERIOD_KEY: "DAILY",
+            AGGREGATION_PERIOD_KEY: AGGREGATION_DEFAULT,
             START_TIME_KEY: {
                 "day": start_date.day,
                 "month": start_date.month,
@@ -101,11 +100,37 @@ def read_json_file(json_file):
     f = open(json_file)
     return json.load(f)
 
+def get_freshness_date(structure_report):
+    dispatch_report = get_report_method(structure_report)
+    data_response = dispatch_report.get(
+                            name=f'apps/{BUNDLE_APP}/{structure_report["type"]}'
+                            ).execute()
+    
+    freshness_info = next(
+                        filter(
+                            lambda item:
+                                item["aggregationPeriod"] == AGGREGATION_DEFAULT,
+                                data_response["freshnessInfo"]["freshnesses"]
+                        )
+                    )
+    
+    freshness_date_year = freshness_info["latestEndTime"]["year"]
+    freshness_date_month = freshness_info["latestEndTime"]["month"]
+    freshness_date_day = freshness_info["latestEndTime"]["day"]
+
+    return datetime.strptime(f'{freshness_date_year}-{freshness_date_month}-{freshness_date_day}', "%Y-%m-%d").date()
+
 def main():
     reports = read_json_file("vitals-reports.json")
   
-    for report in reports:  
+    for report in reports:
         dispatch_report = get_report_method(report)
+        
+        start_date = datetime.strptime(START_TIME, "%Y-%m-%d").date()
+        end_date = get_freshness_date(report)
+        
+        generate_log(log_type.PROCESS_INFO,
+                     f'Report {report["type"]} will run between the periods of {start_date} and {end_date}')
         
         should_repeat = True
         page_token = ''
@@ -113,7 +138,7 @@ def main():
         page = 0
 
         while should_repeat:
-            body = get_body(report,page_token)
+            body = get_body(report,page_token,start_date, end_date)
             data_response = dispatch_report.query(
                             name=f'apps/{BUNDLE_APP}/{report["type"]}', 
                             body=body).execute()

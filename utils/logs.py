@@ -17,6 +17,7 @@ class log_type:
     FILE_READ = colors.OKCYAN
     PROCESS_FINISHED = colors.ENDC
     FILE_NOT_FOUND = colors.WARNING
+    PROCESS_INFO = colors.WARNING
 
 def generate_log(log_type,content):
     print(f"{log_type} {datetime.now()} - {content}")
