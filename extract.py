@@ -86,7 +86,7 @@ def get_report_method(structure_report):
     elif report_type == ReportType.ERROR_COUNT:
         return reporting_user.vitals().errors().counts()
 
-def writeJsonFile(data,file_name):
+def write_json_file(data,file_name):
     raw_data_app_folder = f'{RAW_FOLDER}/{BUNDLE_APP}'
     if not os.path.exists(raw_data_app_folder):
         os.makedirs(raw_data_app_folder)
@@ -155,7 +155,7 @@ def main():
             
             page += 1
                 
-        writeJsonFile(full_data_response,report["fileName"])
+        write_json_file(full_data_response,report["fileName"])
     
     generate_log(log_type.PROCESS_FINISHED,f"Extract process finished!")
     
