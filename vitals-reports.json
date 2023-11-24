@@ -13,13 +13,13 @@
     },
     {
         "type":"anrRateMetricSet",
-        "metrics": ["anrRate","distinctUsers"],
+        "metrics": ["anrRate","userPerceivedAnrRate","distinctUsers"],
         "dimensions": [],
         "fileName": "anr-rate-overview"
     },
     {
         "type":"anrRateMetricSet",
-        "metrics": ["anrRate","distinctUsers"],
+        "metrics": ["anrRate","userPerceivedAnrRate","distinctUsers"],
         "dimensions": ["versionCode"],
         "fileName": "anr-rate-by-version-code"
     },

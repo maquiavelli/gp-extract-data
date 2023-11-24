@@ -31,3 +31,5 @@ Here are some objectives that will be met during the course of development.
 - [x] Recognize fresh data;
 - [x] Disable ErrorCount until you understand its real use
 - [x] Separate reports dictionary in json file
+- [x] Add userPerceivedAnrRate metric to AnrRateMetricSet
+ 
