@@ -27,8 +27,9 @@ PAGE_TOKEN_KEY = "pageToken"
 
 #PARAMS
 AGGREGATION_DEFAULT = "DAILY"
+RESOURCES_FILE ="resources-config.json"
 
-class ReportType(Enum):
+class ResourceMethod(Enum):
     CRASH_RATE = "crashRateMetricSet"
     SLOW_START_RATE = "slowStartRateMetricSet"
     ANR_RATE = "anrRateMetricSet"
@@ -42,18 +43,18 @@ def get_scoped_credentials():
   credentials = service_account.Credentials.from_service_account_file(credentials_url)
   return credentials.with_scopes(scopes)
 
-def get_reporting_client():
+def get_resource_client():
   scoped_credentials = get_scoped_credentials()
   return build("playdeveloperreporting", 
                       "v1beta1", 
                       credentials=scoped_credentials, 
                       cache_discovery=False)
 
-def get_body(structure_report, page_token,start_date, end_date):
+def get_body(resource, page_token,start_date, end_date):
 
     body = {
-        METRICS_KEY: structure_report["metrics"],
-        DIMENSIONS_KEY: structure_report["dimensions"],
+        METRICS_KEY: resource["metrics"],
+        DIMENSIONS_KEY: resource["dimensions"],
         TIMELINE_SPEC_KEY: {
             AGGREGATION_PERIOD_KEY: AGGREGATION_DEFAULT,
             START_TIME_KEY: {
@@ -72,23 +73,23 @@ def get_body(structure_report, page_token,start_date, end_date):
     
     return body
 
-def get_report_method(structure_report):
-    report_type = ReportType(structure_report["type"])
-    reporting_user = get_reporting_client()
+def get_resource_method(resource):
+    resource_method = ResourceMethod(resource["method"])
+    resource_client = get_resource_client()
 
-    if report_type == ReportType.CRASH_RATE:
-        return reporting_user.vitals().crashrate()
-    elif report_type == ReportType.SLOW_START_RATE:
-        return reporting_user.vitals().slowstartrate()
-    elif report_type == ReportType.ANR_RATE:
-        return reporting_user.vitals().anrrate()
-    elif report_type == ReportType.ERROR_COUNT:
-        return reporting_user.vitals().errors().counts()
+    if resource_method == ResourceMethod.CRASH_RATE:
+        return resource_client.vitals().crashrate()
+    elif resource_method == ResourceMethod.SLOW_START_RATE:
+        return resource_client.vitals().slowstartrate()
+    elif resource_method == ResourceMethod.ANR_RATE:
+        return resource_client.vitals().anrrate()
+    elif resource_method == ResourceMethod.ERROR_COUNT:
+        return resource_client.vitals().errors().counts()
     
-def get_freshness_date(structure_report):
-    dispatch_report = get_report_method(structure_report)
-    data_response = dispatch_report.get(
-                            name=f'apps/{BUNDLE_APP}/{structure_report["type"]}'
+def get_freshness_date(resource):
+    dispatch_resource = get_resource_method(resource)
+    data_response = dispatch_resource.get(
+                            name=f'apps/{BUNDLE_APP}/{resource["method"]}'
                             ).execute()
     
     freshness_info = next(
@@ -106,16 +107,16 @@ def get_freshness_date(structure_report):
     return datetime.strptime(f'{freshness_date_year}-{freshness_date_month}-{freshness_date_day}', "%Y-%m-%d").date()
 
 def main():
-    reports = read_json_file("vitals-reports.json")
+    resources = read_json_file(RESOURCES_FILE)
   
-    for report in reports:
-        dispatch_report = get_report_method(report)
+    for resource in resources:
+        dispatch_resource = get_resource_method(resource)
         
         start_date = datetime.strptime(START_TIME, "%Y-%m-%d").date()
-        end_date = get_freshness_date(report)
+        end_date = get_freshness_date(resource)
         
         generate_log(log_type.PROCESS_INFO,
-                     f'Report {report["type"]} will run between the periods of {start_date} and {end_date}')
+                     f'Resource {resource["method"]} will run between the periods of {start_date} and {end_date}')
         
         should_repeat = True
         page_token = ''
@@ -123,12 +124,12 @@ def main():
         page = 0
 
         while should_repeat:
-            body = get_body(report,page_token,start_date, end_date)
-            data_response = dispatch_report.query(
-                            name=f'apps/{BUNDLE_APP}/{report["type"]}', 
+            body = get_body(resource,page_token,start_date, end_date)
+            data_response = dispatch_resource.query(
+                            name=f'apps/{BUNDLE_APP}/{resource["method"]}', 
                             body=body).execute()
             
-            generate_log(log_type.DATA_READ,f"Retrieved page {page} of the query {report['type']}")
+            generate_log(log_type.DATA_READ,f"Retrieved page {page} of the query {resource['method']}")
             
             if "rows" in data_response:
                 full_data_response.extend(data_response["rows"])
@@ -142,7 +143,7 @@ def main():
                       
         directory_to_write_file = f'{RAW_FOLDER}/{BUNDLE_APP}'
         write_json_file(directory_to_write_file,
-                        report["fileName"],
+                        resource["fileName"],
                         full_data_response)
     
     generate_log(log_type.PROCESS_FINISHED,f"Extract process finished!")
