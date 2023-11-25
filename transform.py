@@ -1,22 +1,19 @@
 import json
 import os
-import csv
+
 from datetime import datetime
 from dotenv import load_dotenv
 from utils.logs import log_type,generate_log
+from utils.files import read_json_file, get_all_json_files_on_path,write_csv_file
 
 load_dotenv()
+# ENVIRONMENTS
 RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
 DATASETS_FOLDER =  os.getenv('PARAMS_DATASETS_FOLDER')
 BUNDLE_APP = os.getenv("PARAMS_BUNDLE_APP")
 
-def get_all_json_files_on_folder(folder):
-    path_to_json = folder
-    return [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
-
-def read_json_file(json_file):
-    with open(json_file, 'r') as f:
-        return json.load(f)
+#CONSTANTS
+PARAM_RAW_BUNDLE_PATH = os.path.join(RAW_FOLDER, BUNDLE_APP) 
       
 def transform_dimension(dimension):
     return {dimension["dimension"]: dimension["stringValue"]}
@@ -35,33 +32,21 @@ def transform_report_row(row):
 def transform_report_data_to_event_list(report_data):
     return [transform_report_row(row) for row in report_data]
 
-def write_csv_file(data, file_name):
-    datasets_app_folder = os.path.join(DATASETS_FOLDER, BUNDLE_APP)
-    if not os.path.exists(datasets_app_folder):
-        os.makedirs(datasets_app_folder)
-
-    csvFile = os.path.join(datasets_app_folder, f'{file_name}.csv')
-
-    keys = data[0].keys()
-    with open(csvFile, 'w', newline='') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(data)
-
-    generate_log(log_type.FILE_CREATED, f"{csvFile} created!")
-
 def main():
     try:
-        json_files = get_all_json_files_on_folder(os.path.join(RAW_FOLDER, BUNDLE_APP))
+        json_path = PARAM_RAW_BUNDLE_PATH
+        list_json_files = get_all_json_files_on_path(json_path)
 
-        if json_files:
-            for file in json_files:
-                report_data = read_json_file(os.path.join(RAW_FOLDER, BUNDLE_APP, file))
+        if list_json_files:
+            for file in list_json_files:
+                report_data = read_json_file(os.path.join(json_path, file))
                 generate_log(log_type.FILE_READ, f"File read {file}")
+                
                 event_list = transform_report_data_to_event_list(report_data)
-
                 clean_file_name, _ = os.path.splitext(file)
-                write_csv_file(event_list, clean_file_name)
+                
+                dataset_path = DATASETS_FOLDER
+                write_csv_file(dataset_path, clean_file_name, event_list)
 
             generate_log(log_type.PROCESS_FINISHED, "Transform process finished!")
         else:
