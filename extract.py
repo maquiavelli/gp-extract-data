@@ -1,4 +1,3 @@
-import json
 import os
 
 from dotenv import load_dotenv
@@ -9,6 +8,7 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
 from utils.logs import log_type,generate_log
+from utils.files import read_json_file,write_json_file
 
 #ENVIRONMENT CONFIG
 load_dotenv()
@@ -74,7 +74,6 @@ def get_body(structure_report, page_token,start_date, end_date):
 
 def get_report_method(structure_report):
     report_type = ReportType(structure_report["type"])
-
     reporting_user = get_reporting_client()
 
     if report_type == ReportType.CRASH_RATE:
@@ -85,21 +84,7 @@ def get_report_method(structure_report):
         return reporting_user.vitals().anrrate()
     elif report_type == ReportType.ERROR_COUNT:
         return reporting_user.vitals().errors().counts()
-
-def write_json_file(data,file_name):
-    raw_data_app_folder = f'{RAW_FOLDER}/{BUNDLE_APP}'
-    if not os.path.exists(raw_data_app_folder):
-        os.makedirs(raw_data_app_folder)
-        
-    file = f'{raw_data_app_folder}/{file_name}.json'
-    with open(file, 'w', encoding='utf-8') as f:
-          json.dump(data, f, ensure_ascii=False, indent=4)
-    generate_log(log_type.FILE_CREATED,f"File {file} created!")
-
-def read_json_file(json_file):
-    f = open(json_file)
-    return json.load(f)
-
+    
 def get_freshness_date(structure_report):
     dispatch_report = get_report_method(structure_report)
     data_response = dispatch_report.get(
@@ -154,8 +139,11 @@ def main():
                 should_repeat = False
             
             page += 1
-                
-        write_json_file(full_data_response,report["fileName"])
+                      
+        directory_to_write_file = f'{RAW_FOLDER}/{BUNDLE_APP}'
+        write_json_file(directory_to_write_file,
+                        report["fileName"],
+                        full_data_response)
     
     generate_log(log_type.PROCESS_FINISHED,f"Extract process finished!")
     
