@@ -18,6 +18,7 @@ class log_type:
     PROCESS_FINISHED = colors.ENDC
     FILE_NOT_FOUND = colors.WARNING
     PROCESS_INFO = colors.WARNING
+    FILE_NOT_CREATED = colors.FAIL
 
 def generate_log(log_type,content):
     print(f"{log_type} {datetime.now()} - {content}")
