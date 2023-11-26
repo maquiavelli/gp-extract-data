@@ -1,38 +1,56 @@
 [
     {
+        "type":"METRIC",
         "method":"crashRateMetricSet",
         "metrics": ["crashRate","distinctUsers"],
         "dimensions": [],
-        "fileName": "crash-rate-overview"
+        "fileName": "crash-rate-overview",
+        "outputKey": "rows"
     },
     {
+        "type":"METRIC",
         "method":"crashRateMetricSet",
         "metrics": ["crashRate","distinctUsers"],
         "dimensions": ["versionCode"],
-        "fileName": "crash-rate-by-version-code"
+        "fileName": "crash-rate-by-version-code",
+        "outputKey": "rows"
     },
     {
+        "type":"METRIC",
         "method":"anrRateMetricSet",
         "metrics": ["anrRate","userPerceivedAnrRate","distinctUsers"],
         "dimensions": [],
-        "fileName": "anr-rate-overview"
+        "fileName": "anr-rate-overview",
+        "outputKey": "rows"
     },
     {
+        "type":"METRIC",
         "method":"anrRateMetricSet",
         "metrics": ["anrRate","userPerceivedAnrRate","distinctUsers"],
         "dimensions": ["versionCode"],
-        "fileName": "anr-rate-by-version-code"
+        "fileName": "anr-rate-by-version-code",
+        "outputKey": "rows"
     },
     {
+        "type":"METRIC",
         "method":"slowStartRateMetricSet",
         "metrics": ["slowStartRate"],
         "dimensions": ["startType"],
-        "fileName": "slow-start-overview"
+        "fileName": "slow-start-overview",
+        "outputKey": "rows"
     },
     {
+        "type":"METRIC",
         "method":"slowStartRateMetricSet",
         "metrics": ["slowStartRate"],
         "dimensions": ["startType","versionCode"],
-        "fileName": "slow-start-by-version-code"
+        "fileName": "slow-start-by-version-code",
+        "outputKey": "rows"
+    },
+    {
+        "type":"REPORT",
+        "method":"errorIssues",
+        "fileName": "report-error-issues",
+        "outputKey": "errorIssues"
     }
 ]

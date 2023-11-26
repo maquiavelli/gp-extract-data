@@ -1,14 +1,17 @@
 import os
+from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from enum import Enum
-from datetime import datetime
+from datetime import datetime,timedelta,timezone
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
+
 from utils.logs import log_type,generate_log
 from utils.files import read_json_file,write_json_file
+
 
 #ENVIRONMENT CONFIG
 load_dotenv()
@@ -24,16 +27,24 @@ AGGREGATION_PERIOD_KEY = "aggregationPeriod"
 START_TIME_KEY = "startTime"
 END_TIME_KEY = "endTime"
 PAGE_TOKEN_KEY = "pageToken"
+INTERVAL = "interval"
+FILTER = "filter"
+PAGE_SIZE = "pageSize"
 
 #PARAMS
 AGGREGATION_DEFAULT = "DAILY"
 RESOURCES_FILE ="resources-config.json"
+
+#FIXED CONFIG TO GET REPORT
+REPORT_PAGE_SIZE = 1000
 
 class ResourceMethod(Enum):
     CRASH_RATE = "crashRateMetricSet"
     SLOW_START_RATE = "slowStartRateMetricSet"
     ANR_RATE = "anrRateMetricSet"
     ERROR_COUNT = "errorCountMetricSet"
+    ERROR_ISSUES = "errorIssues"
+    ERROR_REPORTS = "errorReports"
 
 def get_scoped_credentials():
   scopes = ["https://www.googleapis.com/auth/playdeveloperreporting"]
@@ -50,7 +61,7 @@ def get_resource_client():
                       credentials=scoped_credentials, 
                       cache_discovery=False)
 
-def get_body(resource, page_token,start_date, end_date):
+def get_metric_body(resource, page_token,start_date, end_date):
 
     body = {
         METRICS_KEY: resource["metrics"],
@@ -85,32 +96,78 @@ def get_resource_method(resource):
         return resource_client.vitals().anrrate()
     elif resource_method == ResourceMethod.ERROR_COUNT:
         return resource_client.vitals().errors().counts()
+    elif resource_method == ResourceMethod.ERROR_ISSUES:
+        return resource_client.vitals().errors().issues()
+    elif resource_method == ResourceMethod.ERROR_REPORTS:
+        return resource_client.vitals().errors().reports()
     
 def get_freshness_date(resource):
-    dispatch_resource = get_resource_method(resource)
-    data_response = dispatch_resource.get(
-                            name=f'apps/{BUNDLE_APP}/{resource["method"]}'
-                            ).execute()
-    
-    freshness_info = next(
-                        filter(
-                            lambda item:
-                                item["aggregationPeriod"] == AGGREGATION_DEFAULT,
-                                data_response["freshnessInfo"]["freshnesses"]
+    if resource["type"] == "METRIC":
+        dispatch_resource = get_resource_method(resource)
+        data_response = dispatch_resource.get(
+                                name=f'apps/{BUNDLE_APP}/{resource["method"]}'
+                                ).execute()
+        
+        freshness_info = next(
+                            filter(
+                                lambda item:
+                                    item["aggregationPeriod"] == AGGREGATION_DEFAULT,
+                                    data_response["freshnessInfo"]["freshnesses"]
+                            )
                         )
-                    )
-    
-    freshness_date_year = freshness_info["latestEndTime"]["year"]
-    freshness_date_month = freshness_info["latestEndTime"]["month"]
-    freshness_date_day = freshness_info["latestEndTime"]["day"]
+        
+        freshness_date_year = freshness_info["latestEndTime"]["year"]
+        freshness_date_month = freshness_info["latestEndTime"]["month"]
+        freshness_date_day = freshness_info["latestEndTime"]["day"]
 
-    return datetime.strptime(f'{freshness_date_year}-{freshness_date_month}-{freshness_date_day}', "%Y-%m-%d").date()
+        return datetime.strptime(f'{freshness_date_year}-{freshness_date_month}-{freshness_date_day}', "%Y-%m-%d").date()
+    else:
+        #just a unnecessary return
+        return datetime.today().date()
+
+def get_data_from_resource(resource,page_token,start_date, end_date):
+    
+    dispatch_resource = get_resource_method(resource)
+    
+    resource_type = resource["type"]
+    resource_response = { }
+    
+    if resource_type == "METRIC":
+        body = get_metric_body(resource,page_token,start_date, end_date)
+        resource_response = dispatch_resource.query(
+                                name=f'apps/{BUNDLE_APP}/{resource["method"]}', 
+                                body=body).execute()
+    
+    elif resource_type == "REPORT":
+
+        page_size = REPORT_PAGE_SIZE
+    
+        #info_date_now = datetime.utcnow()
+        
+        resource_response = dispatch_resource.search(
+                            parent=f'apps/{BUNDLE_APP}',
+                            pageToken=page_token,
+                            pageSize=page_size
+                            #filter="errorIssueType = CRASH AND versionCode = 123",
+                            #interval_startTime_year=info_date_now.year,
+                            #interval_startTime_month=info_date_now.month,
+                            #interval_startTime_day=info_date_now.day,
+                            #interval_startTime_hours=info_date_now.hour - 1,
+                            #interval_endTime_year=info_date_now.year,
+                            #interval_endTime_month=info_date_now.month,
+                            #interval_endTime_day=info_date_now.day,
+                            #interval_endTime_hours=info_date_now.hour
+                            ).execute()
+      
+    return resource_response
 
 def main():
     resources = read_json_file(RESOURCES_FILE)
   
     for resource in resources:
-        dispatch_resource = get_resource_method(resource)
+        
+        resource_method = resource['method']
+        resource_type = resource["type"]
         
         start_date = datetime.strptime(START_TIME, "%Y-%m-%d").date()
         end_date = get_freshness_date(resource)
@@ -124,24 +181,28 @@ def main():
         page = 0
 
         while should_repeat:
-            body = get_body(resource,page_token,start_date, end_date)
-            data_response = dispatch_resource.query(
-                            name=f'apps/{BUNDLE_APP}/{resource["method"]}', 
-                            body=body).execute()
-            
-            generate_log(log_type.DATA_READ,f"Retrieved page {page} of the query {resource['method']}")
-            
-            if "rows" in data_response:
-                full_data_response.extend(data_response["rows"])
-            
-            if "nextPageToken" in data_response:
-                page_token = data_response["nextPageToken"]
-            else:
-                should_repeat = False
-            
-            page += 1
+            try:
+                data_response = get_data_from_resource(resource,page_token,start_date, end_date)
+                generate_log(log_type.DATA_READ,f"Retrieved page {page} of the query {resource_method}")
+        
+                output_key = resource["outputKey"]
+                
+                if data_response.get(output_key) is not None:
+                    full_data_response.extend(data_response[output_key])
+                
+                if "nextPageToken" in data_response:
+                    page_token = data_response["nextPageToken"]
+                else:
+                    should_repeat = False
+                
+                page += 1
+                print(f'{len(full_data_response)} records read so far..')
+                
+            except Exception as ex:
+                generate_log(log_type.FILE_NOT_CREATED,f"It was not possible to finish obtaining resource {resource_method} while searching for records on page {page}. Error: {ex}")
+
                       
-        directory_to_write_file = f'{RAW_FOLDER}/{BUNDLE_APP}'
+        directory_to_write_file = f'{RAW_FOLDER}/{resource_type}/{BUNDLE_APP}'
         write_json_file(directory_to_write_file,
                         resource["fileName"],
                         full_data_response)
