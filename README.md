@@ -21,7 +21,11 @@ Here are some objectives that will be met during the course of development.
 - [x] Merge data frames;
 - [x] Refactor code;
 - [X] Discovery about the return of the Error Report query;
-- [ ] Refactor structure responsible for controlling reports;
+- [X] Refactor structure responsible for controlling reports;
+- [X] Fix raw_data folders name;
+- [X] Create exception when page failed;
+- [ ] Implement retry to ssl timeout error or verify if pageToken is resilient;
+- [ ] Fix period information for reports;
 - [ ] Create methods to transform/load by metrics type and reports type;
 - [ ] Verify existant filters. Ex.: If dataset don't have a date value;
 - [ ] Create friendly documentation;

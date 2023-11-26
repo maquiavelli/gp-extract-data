@@ -202,7 +202,7 @@ def main():
                 generate_log(log_type.FILE_NOT_CREATED,f"It was not possible to finish obtaining resource {resource_method} while searching for records on page {page}. Error: {ex}")
 
                       
-        directory_to_write_file = f'{RAW_FOLDER}/{resource_type}/{BUNDLE_APP}'
+        directory_to_write_file = f'{RAW_FOLDER}/{BUNDLE_APP}/{resource_type}'
         write_json_file(directory_to_write_file,
                         resource["fileName"],
                         full_data_response)
