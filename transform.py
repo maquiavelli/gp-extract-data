@@ -14,8 +14,6 @@ RAW_FOLDER =  os.getenv('PARAMS_RAW_FOLDER')
 DATASETS_FOLDER =  os.getenv('PARAMS_DATASETS_FOLDER')
 BUNDLE_APP = os.getenv("PARAMS_BUNDLE_APP")
 
-#CONSTANTS
-
 class ResourceType(Enum):
     METRIC = auto()
     REPORT = auto()
@@ -72,10 +70,6 @@ def get_resources_to_transform():
             "raw_path":report_path
         },
     ]
-
-
-def transform_report_data_to_event_list(report_data):
-    return [transform_metric_row(row) for row in metric_data]
 
 def main():
     resources = get_resources_to_transform()
