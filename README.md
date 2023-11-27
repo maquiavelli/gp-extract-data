@@ -26,7 +26,7 @@ Here are some objectives that will be met during the course of development.
 - [X] Create exception when page failed;
 - [ ] Implement retry to ssl timeout error or verify if pageToken is resilient;
 - [ ] Fix period information for reports;
-- [ ] Create methods to transform/load by metrics type and reports type;
+- [X] Create methods to transform/load by metrics type and reports type;
 - [ ] Verify existant filters. Ex.: If dataset don't have a date value;
 - [ ] Create friendly documentation;
 - [x] Get massive data;
